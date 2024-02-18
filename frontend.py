@@ -27,11 +27,11 @@ def encoder_func(prompt, message, password):
     if len(prompt) < 10 or len(password) == 0 or len(message) == 0:
         return ""
     msg = encoder.encode(message, password, mode='2bit')
-    print('ENCODER>>', 'secret message length:',len(message))
-    print('ENCODER>>', msg)
-    print('ENCODER>>', 'num tokens used:',len(msg))
+    print('ENCODER>>', 'secret message length:', len(message), ', num tokens used:', len(msg))
+    print('ENCODER>>', "encrypted msg:", msg)
+    print('ENCODER>>', "prompt:", prompt)
     enc_txt = model.encode_message(prompt, retr_msg_func=retr_msg_func, msg=msg)
-    print('ENCODER>>', enc_txt)
+    print('ENCODER>>', "generated:", enc_txt)
     return enc_txt
 
 def decoder_func(encoded_str, password):
