@@ -20,8 +20,11 @@ def bruteforce_decode(decoded_stream, password):
                 continue
     return -1
 
-model = llm.LMHeadModel("gpt2")
-model.set_params(top_k=4, temp=0.4, rep_pen=1.15)
+#model_name = 'gpt2'
+model_name = "tiiuae/falcon-7b"
+
+model = llm.LMHeadModel(model_name)
+model.set_params(top_k=4, temp=0.4, rep_pen=1.1)
 
 def encoder_func(prompt, message, password):
     if len(prompt) < 10 or len(password) == 0 or len(message) == 0:
@@ -57,7 +60,7 @@ with gr.Blocks(title='SecretGPT') as demo:
         text_input1 = gr.Textbox(label='Prompt (at least a few words)')
         text_input2 = gr.Textbox(label='Message (more words take more time)')
         text_input3 = gr.Textbox(label='Password')
-        text_button1 = gr.Button("Encode")
+        text_button1 = gr.Button("Encode with " + model_name.split('/')[-1])
         text_output = gr.Textbox(label='Encoded message', interactive=False)
         text_button2 = gr.Button("Post to SecretGPT Twitter 💃💃💃")
 

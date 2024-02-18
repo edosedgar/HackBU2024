@@ -6,6 +6,7 @@ from transformers import AutoModelForCausalLM , AutoTokenizer
 from transformers import LogitsProcessorList, TopKLogitsWarper,TemperatureLogitsWarper, RepetitionPenaltyLogitsProcessor, NoBadWordsLogitsProcessor
 
 # Classes required to work with LLMs
+torch.backends.cuda.matmul.allow_tf32 = True
 
 class BeamSearchNode:
     def __init__(self, sequence, score):
@@ -16,7 +17,7 @@ class LMHeadModel:
 
     def __init__(self, model_name):
         # Initialize the model and the tokenizer.
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto')
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto', torch_dtype=torch.float16)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, decode_with_prefix_space=True)
         self.pad_token = self.tokenizer.eos_token
         self.set_params(top_k=5, temp=1.0, rep_pen=1.0)
@@ -38,7 +39,7 @@ class LMHeadModel:
     def next_word(self, sentence):
         with torch.no_grad():
             input_ids = self.tokenizer.encode(sentence, return_tensors="pt")
-            logits = self.model(input_ids).logits[:, -1, :]
+            logits = self.model(input_ids).logits[:, -1, :].float()
         logits = self.logits_processor(input_ids, logits)
 
         # Get the token probabilities for all candidates.
