@@ -14,6 +14,8 @@ The project was done at [HackBU 2024 hackathon](https://devpost.com/software/sec
 
 SecretGPT takes a secret message specified by the user and encodes the information into the generated output of a large language model (LLM). The generated text is seemingly innocent and contextually unrelated to the secret it holds. We provide an example below:
 
+**prompt**: ```I am always being asked if I like doing hackthons, but```
+
 **secret**: ```meet@ITC```
 
 **generated text (encoding)**:
