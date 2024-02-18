@@ -5,16 +5,16 @@ from transformers import pipeline
 from transformers import AutoModelForCausalLM , AutoTokenizer
 from transformers import LogitsProcessorList, TopKLogitsWarper,TemperatureLogitsWarper, RepetitionPenaltyLogitsProcessor, NoBadWordsLogitsProcessor
 
-# Classes required to work with LLMs
 torch.backends.cuda.matmul.allow_tf32 = True
 
+# Classes required to work with LLMs
 class BeamSearchNode:
     def __init__(self, sequence, score):
         self.sequence = sequence
         self.score = score
 
 class LMHeadModel:
-
+    # init everything
     def __init__(self, model_name):
         # Initialize the model and the tokenizer.
         self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto', torch_dtype=torch.float16)
@@ -22,6 +22,7 @@ class LMHeadModel:
         self.pad_token = self.tokenizer.eos_token
         self.set_params(top_k=5, temp=1.0, rep_pen=1.0)
 
+    # control LLMs logits
     def set_params(self, top_k=5, temp=1.0, rep_pen=1.0):
         self.top_k = top_k
         ## To avoid non-sense
@@ -36,6 +37,7 @@ class LMHeadModel:
             RepetitionPenaltyLogitsProcessor(penalty=rep_pen)
         ])
 
+    # predict next wotd based off the context
     def next_word(self, sentence):
         with torch.no_grad():
             input_ids = self.tokenizer.encode(sentence, return_tensors="pt")
@@ -54,6 +56,7 @@ class LMHeadModel:
         # Return the top k candidates and their probabilities.
         return [topk_candidates_tokens, positions, probs]
 
+    # use Beamer algorithm to predict next max_words amount of words
     def next_words(self, sentence, max_words=2):
         beam = [BeamSearchNode([sentence], 1.0)]
 
@@ -72,6 +75,7 @@ class LMHeadModel:
         words, prob = list(zip(*[(node.sequence, node.score) for node in beam]))
         return words, prob
 
+    # encode message
     def encode_message(self, prompt, retr_msg_func, msg):
         context = prompt
         pos = 0
@@ -91,6 +95,7 @@ class LMHeadModel:
                     context = context + tokens[np.argmax(probs)]
         return context
 
+    # decode message
     def decode_message(self, encoded_msg):
         tokens_ids = self.tokenizer.encode(encoded_msg, return_tensors='np')[0]
         decoded_msg = []
