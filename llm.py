@@ -79,7 +79,9 @@ class LMHeadModel:
     def encode_message(self, prompt, retr_msg_func, msg):
         context = prompt
         pos = 0
+        max_tokens = 0
         while True:
+            #print(context)
             tokens, _, probs = self.next_word(context)
             idx = retr_msg_func(pos, probs, msg)
             #print(idx, tokens[idx])
@@ -92,6 +94,12 @@ class LMHeadModel:
                     context = context + '.'
                     break
                 else:
+                    max_tokens += 1
+                    if max_tokens < 20:
+                        if any([token == '.' for token in tokens]) or \
+                            any([token == ',' for token in tokens]):
+                            context = context + '.'
+                            break
                     context = context + tokens[np.argmax(probs)]
         return context
 
