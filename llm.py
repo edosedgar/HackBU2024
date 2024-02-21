@@ -95,9 +95,17 @@ class LMHeadModel:
                     break
                 else:
                     max_tokens += 1
-                    if max_tokens < 20:
+                    if max_tokens > 20:
                         if any([token == '.' for token in tokens]) or \
-                            any([token == ',' for token in tokens]):
+                            any([token == ',' for token in tokens]) or \
+                            any([token == ':' for token in tokens]) or \
+                            any([token == '!' for token in tokens]) or \
+                            any([token == '?' for token in tokens]) or \
+                            any([token == '-' for token in tokens]):
+                            context = context + '.'
+                            break
+                        # hard limit
+                        if max_tokens > 1024:
                             context = context + '.'
                             break
                     context = context + tokens[np.argmax(probs)]
